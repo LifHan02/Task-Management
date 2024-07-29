@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <script>
+      function createTask() {
+        google.script.run.withSuccessHandler(alert)
+          .createTask(
+            document.getElementById('title').value,
+            document.getElementById('description').value,
+            document.getElementById('deadline').value,
+            document.getElementById('assignedTo').value
+          );
+        document.getElementById('taskForm').reset();
+        getTasks();
+      }
+
+      function getTasks() {
+        google.script.run.withSuccessHandler(displayTasks).getTasks();
+      }
+
+      function displayTasks(tasks) {
+        var output = '<table border="1"><tr><th>ID</th><th>Title</th><th>Description</th><th>Deadline</th><th>Assigned To</th><th>Status</th><th>Actions</th></tr>';
+        for (var i = 0; i < tasks.length; i++) {
+          output += '<tr>' +
+            '<td>' + tasks[i].id + '</td>' +
+            '<td>' + tasks[i].title + '</td>' +
+            '<td>' + tasks[i].description + '</td>' +
+            '<td>' + new Date(tasks[i].deadline).toLocaleDateString() + '</td>' +
+            '<td>' + tasks[i].assignedTo + '</td>' +
+            '<td>' + tasks[i].status + '</td>' +
+            '<td><button onclick="updateTaskStatus(' + tasks[i].id + ', \'Completed\')">Mark as Completed</button>' +
+            '<button onclick="deleteTask(' + tasks[i].id + ')">Delete</button></td>' +
+            '</tr>';
+        }
+        output += '</table>';
+        document.getElementById('taskList').innerHTML = output;
+      }
+
+      function updateTaskStatus(taskId, status) {
+        google.script.run.withSuccessHandler(alert).updateTaskStatus(taskId, status);
+        getTasks();
+      }
+
+      function deleteTask(taskId) {
+        google.script.run.withSuccessHandler(alert).deleteTask(taskId);
+        getTasks();
+      }
+
+      function listUsers() {
+        google.script.run.withSuccessHandler(displayUsers).listUsers();
+      }
+
+      function displayUsers(users) {
+        var output = '';
+        for (var i = 0; i < users.length; i++) {
+          output += '<option value="' + users[i] + '">' + users[i] + '</option>';
+        }
+        document.getElementById('assignedTo').innerHTML = output;
+      }
+
+      window.onload = function() {
+        getTasks();
+        listUsers();
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Task Manager</h1>
+    <form id="taskForm" onsubmit="createTask(); return false;">
+      <label>Title: </label><input type="text" id="title" required><br>
+      <label>Description: </label><textarea id="description"></textarea><br>
+      <label>Deadline: </label><input type="date" id="deadline" required><br>
+      <label>Assigned To: </label><select id="assignedTo"></select><br>
+      <button type="submit">Create Task</button>
+    </form>
+    <h2>Task List</h2>
+    <div id="taskList"></div>
+  </body>
+</html>
